@@ -28,6 +28,9 @@
     <Compile Include="Utils\TextEntity.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Localization\CGHUDInfo_Localization.json" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="GlobalFramework-ASM">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\GTFO\BepInEx\interop\GlobalFramework-ASM.dll</HintPath>
     </Reference>

@@ -1,0 +1,270 @@
+{
+  "Internal": {
+    "FeatureSettingsTexts": {
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo.Name": {
+        "FName": {
+          "English": "Color Grading HUD Info",
+          "Chinese": "HUD信息增强",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo.Description": {
+        "FDescription": {
+          "English": "Make HUD info more legible",
+          "Chinese": "使HUD信息更清晰易读",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.ShowSlots": {
+        "FSDisplayName": {
+          "English": "Show Slots",
+          "Chinese": "显示栏位",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.HideEmptySlots": {
+        "FSDisplayName": {
+          "English": "Hide Empty Slots",
+          "Chinese": "隐藏空栏位",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.TransparentWhenAim": {
+        "FSDisplayName": {
+          "English": "Transparent When Aim",
+          "Chinese": "瞄准时透明",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.AlwaysVisible": {
+        "FSDisplayName": {
+          "English": "Always Visible",
+          "Chinese": "信息常显",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      }
+    },
+    "FeatureSettingsEnumTexts": {
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+HUDInfos": {
+        "English": {
+          "Health": "Health",
+          "Infection": "Infection",
+          "GearStandard": "Gear Standard",
+          "GearSpecial": "Gear Special",
+          "GearClass": "Gear Class",
+          "ResourcePack": "Resource Pack",
+          "Consumable": "Consumable",
+          "BotLeader": "Bot Leader"
+        },
+        "Chinese": {
+          "Health": "生命值",
+          "Infection": "感染值",
+          "GearStandard": "主武器",
+          "GearSpecial": "副武器",
+          "GearClass": "工具",
+          "ResourcePack": "资源包",
+          "Consumable": "消耗品",
+          "BotLeader": "机器人指挥"
+        },
+        "French": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Italian": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "German": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Spanish": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Russian": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Portuguese_Brazil": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Polish": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Japanese": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        },
+        "Korean": {
+          "Health": null,
+          "Infection": null,
+          "GearStandard": null,
+          "GearSpecial": null,
+          "GearClass": null,
+          "ResourcePack": null,
+          "Consumable": null,
+          "BotLeader": null
+        }
+      }
+    },
+    "ExtraTexts": [
+      {
+        "UntranslatedText": "生命值",
+        "Description": "",
+        "ID": 1,
+        "Languages": {
+          "English": "Health",
+          "Chinese": "生命值"
+        }
+      },
+      {
+        "UntranslatedText": "感染值",
+        "Description": "",
+        "ID": 2,
+        "Languages": {
+          "English": "Infection",
+          "Chinese": "感染值"
+        }
+      },
+      {
+        "UntranslatedText": "空的资源栏位",
+        "Description": "",
+        "ID": 3,
+        "Languages": {
+          "English": "Empty Resource Slot",
+          "Chinese": "空的资源栏位"
+        }
+      },
+      {
+        "UntranslatedText": "空的消耗品栏位",
+        "Description": "",
+        "ID": 4,
+        "Languages": {
+          "English": "Empty Consumable Slot",
+          "Chinese": "空的消耗品栏位"
+        }
+      },
+      {
+        "UntranslatedText": "跟随",
+        "Description": "",
+        "ID": 5,
+        "Languages": {
+          "English": "Follow",
+          "Chinese": "跟随"
+        }
+      },
+      {
+        "UntranslatedText": "你",
+        "Description": "",
+        "ID": 6,
+        "Languages": {
+          "English": "You",
+          "Chinese": "你"
+        }
+      }
+    ]
+  },
+  "External": {
+    "ExternalFeatureSettingsTexts": {},
+    "ExternalEnumTexts": {}
+  }
+}

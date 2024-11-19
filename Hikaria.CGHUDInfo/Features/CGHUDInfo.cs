@@ -14,7 +14,7 @@ namespace Hikaria.CGHUDInfo.Features
     [EnableFeatureByDefault]
     public class CGHUDInfo : Feature
     {
-        public override string Name => "HUD 信息增强";
+        public override string Name => "HUD信息增强";
 
         public override string Description => "使HUD信息更清晰易读";
 
@@ -40,11 +40,14 @@ namespace Hikaria.CGHUDInfo.Features
                 HUDInfos.BotLeader
             };
 
-            [FSDisplayName("隐藏空的栏位")]
+            [FSDisplayName("隐藏空栏位")]
             public bool HideEmptySlots { get; set; } = false;
 
-            [FSDisplayName("瞄准时使用最小透明度")]
-            public bool UseMiniumAlphaWhenAiming { get; set; } = true;
+            [FSDisplayName("瞄准时透明")]
+            public bool TransparentWhenAim { get; set; } = true;
+
+            [FSDisplayName("信息常显")]
+            public bool AlwaysVisible { get; set; } = true;
         }
 
         [Localized]
@@ -185,13 +188,13 @@ namespace Hikaria.CGHUDInfo.Features
                 if (Settings.ShowSlots.Contains(HUDInfos.Health))
                 {
                     var health = damageable.GetHealthRel();
-                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health + damageable.Infection)}><size=80%><u>生命值 {health * 100f:N0}%</u></size></color>");
+                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health + damageable.Infection)}><size=80%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
                 }
 
                 if (Settings.ShowSlots.Contains(HUDInfos.Infection))
                 {
                     if (damageable.Infection > 0.01f)
-                        sb.AppendLine($"<color=#00FFA8><size=70%>感染值 {damageable.Infection * 100f:N0}%</size></color>");
+                        sb.AppendLine($"<color=#00FFA8><size=70%>{Localization.Get(2)} {damageable.Infection * 100f:N0}%</size></color>");
                 }
 
                 var backpack = __instance.m_playerBackpack;
@@ -255,7 +258,7 @@ namespace Hikaria.CGHUDInfo.Features
                         }
                     }
                     if (!flag && !Settings.HideEmptySlots)
-                        sb.AppendLine($"<color=#B3B3B3>空的资源栏位</color>");
+                        sb.AppendLine($"<color=#B3B3B3>{Localization.Get(3)}</color>");
 
 
                     flag = false;
@@ -273,7 +276,7 @@ namespace Hikaria.CGHUDInfo.Features
                         }
                     }
                     if (!flag && !Settings.HideEmptySlots)
-                        sb.AppendLine($"<color=#B3B3B3>空的消耗品栏位</color>");
+                        sb.AppendLine($"<color=#B3B3B3>{Localization.Get(4)}</color>");
                 }
 
                 if (Settings.ShowSlots.Contains(HUDInfos.BotLeader) && owner.IsBot)
@@ -283,7 +286,7 @@ namespace Hikaria.CGHUDInfo.Features
                     {
                         var leader = component.SyncValues.Leader;
                         if (leader != null)
-                            sb.AppendLine($"跟随 <color=#{ColorUtility.ToHtmlStringRGB(leader.Owner.PlayerColor)}>{(leader.IsLocallyOwned ? "你" : leader.Owner.NickName)}</color>");
+                            sb.AppendLine($"{Localization.Get(5)} <color=#{ColorUtility.ToHtmlStringRGB(leader.Owner.PlayerColor)}>{(leader.IsLocallyOwned ? $"{Localization.Get(6)}" : leader.Owner.NickName)}</color>");
                     }
                 }
 
@@ -322,7 +325,7 @@ namespace Hikaria.CGHUDInfo.Features
                 float scale = Mathf.Clamp(Mathf.Min(Mathf.Max((m_owner.Position - s_localPlayerAgent.Position).magnitude, MIN_DISTANCE), MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
                 navMarker.transform.localScale = Vector3.one * scale;
 
-                if (Settings.UseMiniumAlphaWhenAiming && (s_localPlayerAgent.Inventory.WieldedItem?.AimButtonHeld ?? false))
+                if (Settings.TransparentWhenAim && (s_localPlayerAgent.Inventory.WieldedItem?.AimButtonHeld ?? false))
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
@@ -335,7 +338,9 @@ namespace Hikaria.CGHUDInfo.Features
                     navMarker.SetAlpha(Mathf.Clamp(num3, MIN_ANGLE_ALPHA_VALUE, 1f));
                 }
 
-                placeNavMarkerOnGO.m_extraInfoVisible = true;
+                if (Settings.AlwaysVisible)
+                    placeNavMarkerOnGO.m_extraInfoVisible = true;
+
                 placeNavMarkerOnGO.OnPlayerInfoUpdated(false);
             }
 
