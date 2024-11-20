@@ -7,6 +7,7 @@ using TheArchive.Core.Attributes.Feature.Settings;
 using TheArchive.Core.FeaturesAPI;
 using TheArchive.Core.Localization;
 using TheArchive.Loader;
+using TheArchive.Utilities;
 using UnityEngine;
 
 namespace Hikaria.CGHUDInfo.Features
@@ -87,6 +88,11 @@ namespace Hikaria.CGHUDInfo.Features
 
         public override void OnDisable()
         {
+            foreach (var modifier in UnityEngine.Object.FindObjectsOfType<PlayerHudDistanceModifier>())
+            {
+                modifier.SafeDestroy();
+            }
+
             _sentryGunInstances.Clear();
         }
 
@@ -189,11 +195,16 @@ namespace Hikaria.CGHUDInfo.Features
                 {
                     var health = damageable.GetHealthRel();
                     sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health + damageable.Infection)}><size=80%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
+                    if (Localization.CurrentLanguage != TheArchive.Core.Localization.Language.English)
+                    {
+                        // 添加空白行避免下划线与文本重叠问题
+                        sb.AppendLine($"<size=40%> </size>");
+                    }
                 }
 
                 if (Settings.ShowSlots.Contains(HUDInfos.Infection))
                 {
-                    if (damageable.Infection > 0.01f)
+                    if (damageable.Infection > 0.1f)
                         sb.AppendLine($"<color=#00FFA8><size=70%>{Localization.Get(2)} {damageable.Infection * 100f:N0}%</size></color>");
                 }
 
@@ -299,7 +310,7 @@ namespace Hikaria.CGHUDInfo.Features
 
         private class PlayerHudDistanceModifier : MonoBehaviour
         {
-            public void Awake()
+            private void Awake()
             {
                 m_owner = GetComponent<PlayerAgent>();
             }
@@ -322,7 +333,7 @@ namespace Hikaria.CGHUDInfo.Features
                     return;
                 }
 
-                float scale = Mathf.Clamp(Mathf.Min(Mathf.Max((m_owner.Position - s_localPlayerAgent.Position).magnitude, MIN_DISTANCE), MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
+                float scale = Mathf.Clamp(Mathf.Clamp(Vector3.Distance(m_owner.Position, s_localPlayerAgent.Position), MIN_DISTANCE, MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
                 navMarker.transform.localScale = Vector3.one * scale;
 
                 if (Settings.TransparentWhenAim && (s_localPlayerAgent.Inventory.WieldedItem?.AimButtonHeld ?? false))
@@ -331,17 +342,17 @@ namespace Hikaria.CGHUDInfo.Features
                 }
                 else
                 {
-                    Vector3 vector = m_owner.EyePosition - s_localPlayerAgent.EyePosition;
-                    float num2 = Vector3.Angle(s_localPlayerAgent.FPSCamera.CameraRayDir, vector);
+                    Vector3 dir = m_owner.EyePosition - s_localPlayerAgent.EyePosition;
+                    float num2 = Vector3.Angle(s_localPlayerAgent.FPSCamera.CameraRayDir, dir);
                     num2 = Mathf.Clamp(num2, MIN_ANGLE_VALUE, MAX_ANGLE_VALUE);
                     float num3 = MIN_ANGLE_VALUE / num2;
                     navMarker.SetAlpha(Mathf.Clamp(num3, MIN_ANGLE_ALPHA_VALUE, 1f));
                 }
 
-                if (Settings.AlwaysVisible)
-                    placeNavMarkerOnGO.m_extraInfoVisible = true;
-
-                placeNavMarkerOnGO.OnPlayerInfoUpdated(false);
+                if (Settings.AlwaysVisible && !placeNavMarkerOnGO.m_extraInfoVisible)
+                    placeNavMarkerOnGO.SetExtraInfoVisible(true);
+                else
+                    placeNavMarkerOnGO.OnPlayerInfoUpdated(true);
             }
 
             private PlayerAgent m_owner;

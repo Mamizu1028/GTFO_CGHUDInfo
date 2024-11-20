@@ -49,6 +49,9 @@
     <Reference Include="TheArchive.Core">
       <HintPath>..\..\GTFO_TheArchive\out\TheArchive.Core.dll</HintPath>
     </Reference>
+    <Reference Include="TheArchive.IL2CPP">
+      <HintPath>..\..\GTFO_TheArchive\TheArchive.IL2CPP\bin\R_BIE\TheArchive.IL2CPP.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\GTFO\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
     </Reference>
