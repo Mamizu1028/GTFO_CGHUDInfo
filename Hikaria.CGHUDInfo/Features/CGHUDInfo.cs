@@ -1,10 +1,14 @@
-﻿using Hikaria.CGHUDInfo.Utils;
+﻿using GameData;
+using Gear;
+using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
+using System;
 using System.Text;
 using TheArchive.Core.Attributes;
 using TheArchive.Core.Attributes.Feature.Settings;
 using TheArchive.Core.FeaturesAPI;
+using TheArchive.Core.FeaturesAPI.Settings;
 using TheArchive.Core.Localization;
 using TheArchive.Loader;
 using TheArchive.Utilities;
@@ -84,6 +88,15 @@ namespace Hikaria.CGHUDInfo.Features
                     _sentryGunInstances[owner.Lookup] = sgi;
                 }
             }
+
+            foreach (var agent in PlayerManager.PlayerAgentsInLevel)
+            {
+                if (!agent.IsLocallyOwned)
+                {
+                    if (agent.GetComponent<PlayerHudDistanceModifier>() == null)
+                        agent.gameObject.AddComponent<PlayerHudDistanceModifier>();
+                }
+            }
         }
 
         public override void OnDisable()
@@ -94,6 +107,14 @@ namespace Hikaria.CGHUDInfo.Features
             }
 
             _sentryGunInstances.Clear();
+        }
+
+        public override void OnFeatureSettingChanged(FeatureSetting setting)
+        {
+            foreach (var modifier in UnityEngine.Object.FindObjectsOfType<PlayerHudDistanceModifier>())
+            {
+                modifier.UpdateNavMarkerOnPlayer();
+            }
         }
 
         private static RatioColorDeterminer _determinerHealth = new RatioColorDeterminer
@@ -238,6 +259,16 @@ namespace Hikaria.CGHUDInfo.Features
                         ItemEquippable itemEquippable3 = backpackItem3.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable3 != null)
                         {
+                            string archetypeName = itemEquippable3.ArchetypeName;
+                            var idRange = itemEquippable3.GearIDRange;
+                            uint compID = idRange.GetCompID(eGearComponent.Category);
+                            eWeaponFireMode compID2 = (eWeaponFireMode)idRange.GetCompID(eGearComponent.FireMode);
+                            if (compID == 12U)
+                            {
+                                var block = SentryGunInstance_Firing_Bullets.GetArchetypeDataForFireMode(compID2);
+                                if (block != null)
+                                    archetypeName = block.PublicName;
+                            }
                             float classAmmoRelInPack = ammoStorage.ClassAmmo.RelInPack;
                             if (_sentryGunInstances.TryGetValue(owner.Lookup, out var sentryGunInstance))
                             {
@@ -245,11 +276,11 @@ namespace Hikaria.CGHUDInfo.Features
                             }
                             if (itemEquippable3.ItemDataBlock != null && itemEquippable3.ItemDataBlock.GUIShowAmmoInfinite)
                             {
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{itemEquippable3.ArchetypeName}</color>");
+                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{archetypeName}</color>");
                             }
                             else
                             {
-                                sb.AppendLine($"<color=#{_determineAmmoWeaponRelInPack.GetDeterminedColorHTML(classAmmoRelInPack)}>{itemEquippable3.ArchetypeName} {classAmmoRelInPack * 100f:N0}%</color>{(backpackItem3.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                sb.AppendLine($"<color=#{_determineAmmoWeaponRelInPack.GetDeterminedColorHTML(classAmmoRelInPack)}>{archetypeName} {classAmmoRelInPack * 100f:N0}%</color>{(backpackItem3.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                             }
                         }
                     }
@@ -320,7 +351,18 @@ namespace Hikaria.CGHUDInfo.Features
                 UpdateNavMarkerOnPlayer();
             }
 
-            private void UpdateNavMarkerOnPlayer()
+            private void OnDestroy()
+            {
+                var placeNavMarkerOnGO = m_owner.NavMarker;
+                var navMarker = placeNavMarkerOnGO?.m_marker;
+                if (navMarker == null)
+                    return;
+
+                navMarker.transform.localScale = Vector3.one * 0.8412f;
+                placeNavMarkerOnGO.OnPlayerInfoUpdated(true);
+            }
+
+            public void UpdateNavMarkerOnPlayer()
             {
                 var placeNavMarkerOnGO = m_owner.NavMarker;
                 var navMarker = placeNavMarkerOnGO?.m_marker;
@@ -329,7 +371,7 @@ namespace Hikaria.CGHUDInfo.Features
                 if (s_localPlayerAgent == null)
                 {
                     s_localPlayerAgent = PlayerManager.GetLocalPlayerAgent();
-                    navMarker.transform.localScale = Vector3.one * MIN_SIZE;
+                    navMarker.transform.localScale = Vector3.one * 0.8412f;
                     return;
                 }
 
@@ -349,10 +391,21 @@ namespace Hikaria.CGHUDInfo.Features
                     navMarker.SetAlpha(Mathf.Clamp(num3, MIN_ANGLE_ALPHA_VALUE, 1f));
                 }
 
-                if (Settings.AlwaysVisible && !placeNavMarkerOnGO.m_extraInfoVisible)
-                    placeNavMarkerOnGO.SetExtraInfoVisible(true);
+                if (Settings.AlwaysVisible)
+                {
+                    if (!placeNavMarkerOnGO.m_extraInfoVisible)
+                    {
+                        placeNavMarkerOnGO.m_extraInfoVisible = true;
+                    }
+                }
                 else
-                    placeNavMarkerOnGO.OnPlayerInfoUpdated(true);
+                {
+                    if (!placeNavMarkerOnGO.m_extraInfoVisible)
+                    {
+                        navMarker.transform.localScale = Vector3.one * 0.8412f;
+                    }
+                }
+                placeNavMarkerOnGO.OnPlayerInfoUpdated(true);
             }
 
             private PlayerAgent m_owner;
