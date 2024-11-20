@@ -1,14 +1,10 @@
-﻿using GameData;
-using Gear;
+﻿using Gear;
 using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
-using System;
-using System.Diagnostics;
 using System.Text;
 using TheArchive.Core.Attributes;
 using TheArchive.Core.Attributes.Feature.Settings;
-using TheArchive.Core.Discord;
 using TheArchive.Core.FeaturesAPI;
 using TheArchive.Core.FeaturesAPI.Settings;
 using TheArchive.Core.Localization;

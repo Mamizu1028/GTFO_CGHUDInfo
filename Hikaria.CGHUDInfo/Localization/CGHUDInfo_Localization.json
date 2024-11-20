@@ -76,6 +76,21 @@
           "Korean": null
         }
       },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.DynamicTrasparency": {
+        "FSDisplayName": {
+          "English": "Dynamic Trasparency",
+          "Chinese": "动态透明度",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
       "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.AlwaysVisible": {
         "FSDisplayName": {
           "English": "Always Visible",
