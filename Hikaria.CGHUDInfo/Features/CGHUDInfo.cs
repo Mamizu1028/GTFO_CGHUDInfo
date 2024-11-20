@@ -399,7 +399,7 @@ namespace Hikaria.CGHUDInfo.Features
                     return;
 
                 navMarker.transform.localScale = Vector3.one * 0.8412f;
-                placeNavMarkerOnGO.OnPlayerInfoUpdated(true);
+                placeNavMarkerOnGO.m_isInfoDirty = true;
             }
 
             public void UpdateNavMarkerOnPlayer()
