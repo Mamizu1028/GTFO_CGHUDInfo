@@ -152,7 +152,7 @@ namespace Hikaria.CGHUDInfo.Features
                 if (__instance.m_marker != null && __instance.type == PlaceNavMarkerOnGO.eMarkerType.Player)
                 {
                     __instance.m_marker.m_playerName.alignment = TMPro.TextAlignmentOptions.Bottom;
-                    __instance.m_marker.m_playerName.fontSizeMax = 25f;
+                    __instance.m_marker.m_playerName.fontSizeMax = 30f;
                 }
             }
         }
@@ -206,15 +206,17 @@ namespace Hikaria.CGHUDInfo.Features
             {
                 if (!__instance.m_hasPlayer || __instance.type != PlaceNavMarkerOnGO.eMarkerType.Player)
                     return ArchivePatch.RUN_OG;
-
                 var playerAgent = __instance.Player;
-                if (playerAgent.IsLocallyOwned)
+                if (playerAgent == null || playerAgent.IsLocallyOwned)
+                    return ArchivePatch.RUN_OG;
+                var owner = playerAgent.Owner;
+                if (owner == null)
+                    return ArchivePatch.RUN_OG;
+                var damageable = playerAgent.Damage;
+                if (damageable == null)
                     return ArchivePatch.RUN_OG;
 
                 StringBuilder sb = new(300);
-
-                var owner = playerAgent.Owner;
-                var damageable = playerAgent.Damage;
 
                 if (Settings.ShowSlots.Contains(HUDInfos.Health))
                 {
@@ -243,8 +245,15 @@ namespace Hikaria.CGHUDInfo.Features
                         ItemEquippable itemEquippable = backpackItem.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable != null)
                         {
-                            var standardAmmoRelInPack = ammoStorage.StandardAmmo.RelInPack;
-                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>{(backpackItem.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                            if (itemEquippable.ItemDataBlock != null && itemEquippable.ItemDataBlock.GUIShowAmmoInfinite)
+                            {
+                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable.ArchetypeName}</color>");
+                            }
+                            else
+                            {
+                                var standardAmmoRelInPack = ammoStorage.StandardAmmo.RelInPack;
+                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>{(backpackItem.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                            }
                         }
                     }
 
@@ -253,8 +262,15 @@ namespace Hikaria.CGHUDInfo.Features
                         ItemEquippable itemEquippable2 = backpackItem2.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable2 != null)
                         {
-                            var specialAmmoRelInPack = ammoStorage.SpecialAmmo.RelInPack;
-                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>{(backpackItem2.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                            if (itemEquippable2.ItemDataBlock != null && itemEquippable2.ItemDataBlock.GUIShowAmmoInfinite)
+                            {
+                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable2.ArchetypeName}</color>");
+                            }
+                            else
+                            {
+                                var specialAmmoRelInPack = ammoStorage.SpecialAmmo.RelInPack;
+                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>{(backpackItem2.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                            }
                         }
                     }
 
@@ -273,56 +289,76 @@ namespace Hikaria.CGHUDInfo.Features
                                 if (block != null)
                                     archetypeName = block.PublicName;
                             }
-                            float classAmmoRelInPack = ammoStorage.ClassAmmo.RelInPack;
-                            if (_sentryGunInstances.TryGetValue(owner.Lookup, out var sentryGunInstance))
-                            {
-                                classAmmoRelInPack = sentryGunInstance.Ammo / sentryGunInstance.AmmoMaxCap;
-                            }
                             if (itemEquippable3.ItemDataBlock != null && itemEquippable3.ItemDataBlock.GUIShowAmmoInfinite)
                             {
                                 sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{archetypeName}</color>");
                             }
                             else
                             {
+                                float classAmmoRelInPack = ammoStorage.ClassAmmo.RelInPack;
+                                if (_sentryGunInstances.TryGetValue(owner.Lookup, out var sentryGunInstance))
+                                {
+                                    classAmmoRelInPack = sentryGunInstance.Ammo / sentryGunInstance.AmmoMaxCap;
+                                }
                                 sb.AppendLine($"<color=#{_determineAmmoWeaponRelInPack.GetDeterminedColorHTML(classAmmoRelInPack)}>{archetypeName} {classAmmoRelInPack * 100f:N0}%</color>{(backpackItem3.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                             }
                         }
                     }
-
-                    bool flag = false;
-                    if (Settings.ShowSlots.Contains(HUDInfos.ResourcePack) && backpack.TryGetBackpackItem(InventorySlot.ResourcePack, out var backpackItem4) && backpackItem4 != null && backpackItem4.Instance != null)
+                    if (Settings.ShowSlots.Contains(HUDInfos.ResourcePack))
                     {
-                        ItemEquippable itemEquippable4 = backpackItem4.Instance.TryCast<ItemEquippable>();
-                        if (itemEquippable4 != null)
+                        bool flag = false;
+                        if (backpack.TryGetBackpackItem(InventorySlot.ResourcePack, out var backpackItem4) && backpackItem4 != null && backpackItem4.Instance != null)
                         {
-                            float resourceAmmoRelInPack = ammoStorage.ResourcePackAmmo.RelInPack;
-                            if (resourceAmmoRelInPack > 0f)
+                            ItemEquippable itemEquippable4 = backpackItem4.Instance.TryCast<ItemEquippable>();
+                            if (itemEquippable4 != null)
                             {
-                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(resourceAmmoRelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmoRelInPack * 100f:N0}%</color>{(backpackItem4.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
-                                flag = true;
+                                if (itemEquippable4.ItemDataBlock != null && itemEquippable4.ItemDataBlock.GUIShowAmmoInfinite)
+                                {
+                                    sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_detemineAmmoResourceRelInPack.GetDeterminedColor(100))}>{itemEquippable4.ArchetypeName}</color>");
+                                    flag = true;
+                                }
+                                else
+                                {
+                                    float resourceAmmoRelInPack = ammoStorage.ResourcePackAmmo.RelInPack;
+                                    if (resourceAmmoRelInPack > 0f)
+                                    {
+                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(resourceAmmoRelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmoRelInPack * 100f:N0}%</color>{(backpackItem4.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                        flag = true;
+                                    }
+                                }
                             }
                         }
+                        if (!flag && !Settings.HideEmptySlots)
+                            sb.AppendLine($"<color=#B3B3B3>{Localization.Get(3)}</color>");
                     }
-                    if (!flag && Settings.ShowSlots.Contains(HUDInfos.ResourcePack) && !Settings.HideEmptySlots)
-                        sb.AppendLine($"<color=#B3B3B3>{Localization.Get(3)}</color>");
 
-
-                    flag = false;
-                    if (Settings.ShowSlots.Contains(HUDInfos.Consumable) && backpack.TryGetBackpackItem(InventorySlot.Consumable, out var backpackItem5) && backpackItem5 != null && backpackItem5.Instance != null)
+                    if (Settings.ShowSlots.Contains(HUDInfos.Consumable))
                     {
-                        ItemEquippable itemEquippable5 = backpackItem5.Instance.TryCast<ItemEquippable>();
-                        if (itemEquippable5 != null)
+                        bool flag = false;
+                        if (backpack.TryGetBackpackItem(InventorySlot.Consumable, out var backpackItem5) && backpackItem5 != null && backpackItem5.Instance != null)
                         {
-                            float consumableAmmoRelInPack = ammoStorage.ConsumableAmmo.RelInPack;
-                            if (consumableAmmoRelInPack > 0f)
+                            ItemEquippable itemEquippable5 = backpackItem5.Instance.TryCast<ItemEquippable>();
+                            if (itemEquippable5 != null)
                             {
-                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {ammoStorage.ConsumableAmmo.RelInPack * 100f:N0}%</color>{(backpackItem5.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
-                                flag = true;
+                                if (itemEquippable5.ItemDataBlock != null && itemEquippable5.ItemDataBlock.GUIShowAmmoInfinite)
+                                {
+                                    sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_detemineAmmoResourceRelInPack.GetDeterminedColor(100))}>{itemEquippable5.ArchetypeName}</color>");
+                                    flag = true;
+                                }
+                                else
+                                {
+                                    float consumableAmmoRelInPack = ammoStorage.ConsumableAmmo.RelInPack;
+                                    if (consumableAmmoRelInPack > 0f)
+                                    {
+                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {ammoStorage.ConsumableAmmo.RelInPack * 100f:N0}%</color>{(backpackItem5.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                        flag = true;
+                                    }
+                                }
                             }
                         }
+                        if (!flag && !Settings.HideEmptySlots)
+                            sb.AppendLine($"<color=#B3B3B3>{Localization.Get(4)}</color>");
                     }
-                    if (!flag && Settings.ShowSlots.Contains(HUDInfos.Consumable) && !Settings.HideEmptySlots)
-                        sb.AppendLine($"<color=#B3B3B3>{Localization.Get(4)}</color>");
                 }
 
                 if (Settings.ShowSlots.Contains(HUDInfos.BotLeader) && owner.IsBot)
@@ -382,7 +418,10 @@ namespace Hikaria.CGHUDInfo.Features
                 float scale = Mathf.Clamp(Mathf.Clamp(Vector3.Distance(m_owner.Position, s_localPlayerAgent.Position), MIN_DISTANCE, MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
                 navMarker.transform.localScale = Vector3.one * scale;
 
-                if (Settings.TransparentWhenAim && (s_localPlayerAgent.Inventory.WieldedItem?.AimButtonHeld ?? false))
+                var wieldItem = s_localPlayerAgent.Inventory.WieldedItem;
+                bool isBulletWeapon = wieldItem?.TryCast<BulletWeapon>() != null;
+
+                if (Settings.TransparentWhenAim && isBulletWeapon && wieldItem.AimButtonHeld)
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
