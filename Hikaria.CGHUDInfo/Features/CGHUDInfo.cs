@@ -44,6 +44,9 @@ namespace Hikaria.CGHUDInfo.Features
 
             [FSDisplayName("信息常显")]
             public bool AlwaysVisible { get; set; } = true;
+
+            [FSDisplayName("使用次数替代百分比")]
+            public bool UseTimesInsteadOfPercentage { get; set; } = true;
         }
 
         [Localized]
@@ -221,11 +224,11 @@ namespace Hikaria.CGHUDInfo.Features
                 if (Settings.ShowSlots.Contains(HUDInfos.Health))
                 {
                     var health = damageable.GetHealthRel();
-                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size=80%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
+                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size=75%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
                     if (Localization.CurrentLanguage != TheArchive.Core.Localization.Language.English)
                     {
                         // 添加空白行避免下划线与文本重叠问题
-                        sb.AppendLine($"<size=40%> </size>");
+                        sb.AppendLine($"<size=37.5%> </size>");
                     }
                 }
 
@@ -319,10 +322,10 @@ namespace Hikaria.CGHUDInfo.Features
                                 }
                                 else
                                 {
-                                    float resourceAmmoRelInPack = ammoStorage.ResourcePackAmmo.RelInPack;
-                                    if (resourceAmmoRelInPack > 0f)
+                                    float resourceAmmo = Settings.UseTimesInsteadOfPercentage ? ammoStorage.ResourcePackAmmo.BulletsInPack : ammoStorage.ResourcePackAmmo.RelInPack * 100f;
+                                    if (resourceAmmo > 0f)
                                     {
-                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(resourceAmmoRelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmoRelInPack * 100f:N0}%</color>{(backpackItem4.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ResourcePackAmmo.RelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmo:N0}{(Settings.UseTimesInsteadOfPercentage ? $" {Localization.Get(7)}{((Localization.CurrentLanguage == TheArchive.Core.Localization.Language.Chinese || resourceAmmo <= 1f) ? string.Empty : "s")}" : "%")}</color>{(backpackItem4.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                                         flag = true;
                                     }
                                 }
@@ -347,10 +350,10 @@ namespace Hikaria.CGHUDInfo.Features
                                 }
                                 else
                                 {
-                                    float consumableAmmoRelInPack = ammoStorage.ConsumableAmmo.RelInPack;
-                                    if (consumableAmmoRelInPack > 0f)
+                                    float consumableAmmo = Settings.UseTimesInsteadOfPercentage ? ammoStorage.ConsumableAmmo.BulletsInPack : ammoStorage.ConsumableAmmo.RelInPack * 100f;
+                                    if (consumableAmmo > 0f)
                                     {
-                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {ammoStorage.ConsumableAmmo.RelInPack * 100f:N0}%</color>{(backpackItem5.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                        sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {consumableAmmo:N0}{(Settings.UseTimesInsteadOfPercentage ? $" {Localization.Get(7)}{((Localization.CurrentLanguage == TheArchive.Core.Localization.Language.Chinese || consumableAmmo <= 1f) ? string.Empty : "s")}" : "%")}</color>{(backpackItem5.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                                         flag = true;
                                     }
                                 }
