@@ -4,7 +4,7 @@ namespace Hikaria.CGHUDInfo.Utils
 {
     public class RatioColorDeterminer
 	{
-		public Color GetDeterminedColor(float ratio)
+		public Color GetDeterminedColor(float ratio, float ratioScale = 1f)
 		{
 			Color color = Color.white;
 			float num = 0f;
@@ -14,8 +14,8 @@ namespace Hikaria.CGHUDInfo.Utils
 				RatioColor ratioColor = _colorGrades[i];
 				if (i != 0)
 				{
-					float num2 = (ratio - num) / (ratioColor.Ratio - num);
-					num = ratioColor.Ratio;
+					float num2 = (ratio - num) / (ratioColor.Ratio * ratioScale - num);
+					num = ratioColor.Ratio * ratioScale;
 					color = Color.Lerp(color2, ratioColor.Color, Mathf.Clamp01(num2));
 					if (num2 < 1f)
 					{
@@ -27,9 +27,9 @@ namespace Hikaria.CGHUDInfo.Utils
 			return color;
 		}
 
-		public string GetDeterminedColorHTML(float ratio)
+		public string GetDeterminedColorHTML(float ratio, float ratioScale = 1f)
 		{
-			return ColorUtility.ToHtmlStringRGBA(GetDeterminedColor(ratio));
+			return ColorUtility.ToHtmlStringRGBA(GetDeterminedColor(ratio, ratioScale));
 		}
 
 		public List<RatioColor> _colorGrades;

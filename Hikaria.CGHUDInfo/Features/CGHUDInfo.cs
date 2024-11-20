@@ -219,7 +219,7 @@ namespace Hikaria.CGHUDInfo.Features
                 if (Settings.ShowSlots.Contains(HUDInfos.Health))
                 {
                     var health = damageable.GetHealthRel();
-                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health + damageable.Infection)}><size=80%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
+                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size=80%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
                     if (Localization.CurrentLanguage != TheArchive.Core.Localization.Language.English)
                     {
                         // 添加空白行避免下划线与文本重叠问题
