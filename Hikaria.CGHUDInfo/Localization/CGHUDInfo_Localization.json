@@ -105,6 +105,21 @@
           "Japanese": null,
           "Korean": null
         }
+      },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.UseTimesInsteadOfPercentage": {
+        "FSDisplayName": {
+          "English": "Use Times Instead Of Percentage",
+          "Chinese": "使用次数替代百分比",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
       }
     },
     "FeatureSettingsEnumTexts": {
@@ -274,6 +289,15 @@
         "Languages": {
           "English": "You",
           "Chinese": "你"
+        }
+      },
+      {
+        "UntranslatedText": "次",
+        "Description": "",
+        "ID": 7,
+        "Languages": {
+          "English": "time",
+          "Chinese": "次"
         }
       }
     ]
