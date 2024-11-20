@@ -4,9 +4,11 @@ using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
 using System;
+using System.Diagnostics;
 using System.Text;
 using TheArchive.Core.Attributes;
 using TheArchive.Core.Attributes.Feature.Settings;
+using TheArchive.Core.Discord;
 using TheArchive.Core.FeaturesAPI;
 using TheArchive.Core.FeaturesAPI.Settings;
 using TheArchive.Core.Localization;
@@ -33,23 +35,16 @@ namespace Hikaria.CGHUDInfo.Features
         public class CGHUDInfoSettings
         {
             [FSDisplayName("显示栏位")]
-            public List<HUDInfos> ShowSlots { get; set; } = new()
-            {
-                HUDInfos.Health,
-                HUDInfos.Infection,
-                HUDInfos.GearStandard,
-                HUDInfos.GearSpecial,
-                HUDInfos.GearClass,
-                HUDInfos.ResourcePack,
-                HUDInfos.Consumable,
-                HUDInfos.BotLeader
-            };
+            public List<HUDInfos> ShowSlots { get; set; } = new();
 
             [FSDisplayName("隐藏空栏位")]
-            public bool HideEmptySlots { get; set; } = false;
+            public bool HideEmptySlots { get; set; } = true;
 
             [FSDisplayName("瞄准时透明")]
             public bool TransparentWhenAim { get; set; } = true;
+
+            [FSDisplayName("动态透明度")]
+            public bool DynamicTrasparency { get; set; } = true;
 
             [FSDisplayName("信息常显")]
             public bool AlwaysVisible { get; set; } = true;
@@ -153,6 +148,19 @@ namespace Hikaria.CGHUDInfo.Features
 
         private static Dictionary<ulong, SentryGunInstance> _sentryGunInstances = new();
 
+        [ArchivePatch(typeof(PlaceNavMarkerOnGO), nameof(PlaceNavMarkerOnGO.PlaceMarker))]
+        private class PlaceNavMarkerOnGO__PlaceMarker__Patch
+        {
+            private static void Postfix(PlaceNavMarkerOnGO __instance)
+            {
+                if (__instance.m_marker != null && __instance.type == PlaceNavMarkerOnGO.eMarkerType.Player)
+                {
+                    __instance.m_marker.m_playerName.alignment = TMPro.TextAlignmentOptions.Bottom;
+                    __instance.m_marker.m_playerName.fontSizeMax = 25f;
+                }
+            }
+        }
+
         [ArchivePatch(typeof(PlayerAgent), nameof(PlayerAgent.Setup))]
         private class PlayerAgent__Setup__Patch
         {
@@ -240,7 +248,7 @@ namespace Hikaria.CGHUDInfo.Features
                         if (itemEquippable != null)
                         {
                             var standardAmmoRelInPack = ammoStorage.StandardAmmo.RelInPack;
-                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>");
+                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>{(backpackItem.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                         }
                     }
 
@@ -250,7 +258,7 @@ namespace Hikaria.CGHUDInfo.Features
                         if (itemEquippable2 != null)
                         {
                             var specialAmmoRelInPack = ammoStorage.SpecialAmmo.RelInPack;
-                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>");
+                            sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>{(backpackItem2.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                         }
                     }
 
@@ -294,12 +302,12 @@ namespace Hikaria.CGHUDInfo.Features
                             float resourceAmmoRelInPack = ammoStorage.ResourcePackAmmo.RelInPack;
                             if (resourceAmmoRelInPack > 0f)
                             {
-                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(resourceAmmoRelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmoRelInPack * 100f:N0}%</color>");
+                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(resourceAmmoRelInPack)}>{itemEquippable4.ArchetypeName} {resourceAmmoRelInPack * 100f:N0}%</color>{(backpackItem4.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                                 flag = true;
                             }
                         }
                     }
-                    if (!flag && !Settings.HideEmptySlots)
+                    if (!flag && Settings.ShowSlots.Contains(HUDInfos.ResourcePack) && !Settings.HideEmptySlots)
                         sb.AppendLine($"<color=#B3B3B3>{Localization.Get(3)}</color>");
 
 
@@ -312,12 +320,12 @@ namespace Hikaria.CGHUDInfo.Features
                             float consumableAmmoRelInPack = ammoStorage.ConsumableAmmo.RelInPack;
                             if (consumableAmmoRelInPack > 0f)
                             {
-                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {ammoStorage.ConsumableAmmo.RelInPack * 100f:N0}%</color>");
+                                sb.AppendLine($"<color=#{_detemineAmmoResourceRelInPack.GetDeterminedColorHTML(ammoStorage.ConsumableAmmo.RelInPack)}>{itemEquippable5.ArchetypeName} {ammoStorage.ConsumableAmmo.RelInPack * 100f:N0}%</color>{(backpackItem5.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
                                 flag = true;
                             }
                         }
                     }
-                    if (!flag && !Settings.HideEmptySlots)
+                    if (!flag && Settings.ShowSlots.Contains(HUDInfos.Consumable) && !Settings.HideEmptySlots)
                         sb.AppendLine($"<color=#B3B3B3>{Localization.Get(4)}</color>");
                 }
 
@@ -382,13 +390,17 @@ namespace Hikaria.CGHUDInfo.Features
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
-                else
+                else if (Settings.DynamicTrasparency)
                 {
                     Vector3 dir = m_owner.EyePosition - s_localPlayerAgent.EyePosition;
                     float num2 = Vector3.Angle(s_localPlayerAgent.FPSCamera.CameraRayDir, dir);
                     num2 = Mathf.Clamp(num2, MIN_ANGLE_VALUE, MAX_ANGLE_VALUE);
                     float num3 = MIN_ANGLE_VALUE / num2;
                     navMarker.SetAlpha(Mathf.Clamp(num3, MIN_ANGLE_ALPHA_VALUE, 1f));
+                }
+                else
+                {
+                    navMarker.SetAlpha(1f);
                 }
 
                 if (Settings.AlwaysVisible)
