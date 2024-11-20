@@ -232,12 +232,12 @@
         }
       },
       {
-        "UntranslatedText": "感染值",
+        "UntranslatedText": "感染度",
         "Description": "",
         "ID": 2,
         "Languages": {
           "English": "Infection",
-          "Chinese": "感染值"
+          "Chinese": "感染度"
         }
       },
       {
@@ -259,12 +259,12 @@
         }
       },
       {
-        "UntranslatedText": "跟随",
+        "UntranslatedText": "正在跟随",
         "Description": "",
         "ID": 5,
         "Languages": {
-          "English": "Follow",
-          "Chinese": "跟随"
+          "English": "Following",
+          "Chinese": "正在跟随"
         }
       },
       {
