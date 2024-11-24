@@ -496,7 +496,9 @@ namespace Hikaria.CGHUDInfo.Features
             private void OnDestroy()
             {
                 var placeNavMarkerOnGO = m_owner.NavMarker;
-                var navMarker = placeNavMarkerOnGO?.m_marker;
+                if (placeNavMarkerOnGO == null)
+                    return;
+                var navMarker = placeNavMarkerOnGO.m_marker;
                 if (navMarker == null)
                     return;
 
@@ -507,7 +509,9 @@ namespace Hikaria.CGHUDInfo.Features
             public void UpdateNavMarkerOnPlayer(bool manualUpdate = false)
             {
                 var placeNavMarkerOnGO = m_owner.NavMarker;
-                var navMarker = placeNavMarkerOnGO?.m_marker;
+                if (placeNavMarkerOnGO == null)
+                    return;
+                var navMarker = placeNavMarkerOnGO.m_marker;
                 if (navMarker == null)
                     return;
 
@@ -524,7 +528,8 @@ namespace Hikaria.CGHUDInfo.Features
                 float scale = Mathf.Clamp(Mathf.Clamp(Vector3.Distance(m_owner.Position, s_localPlayerAgent.Position), MIN_DISTANCE, MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
                 navMarker.transform.localScale = Vector3.one * scale;
 
-                if (Settings.TransparentWhenAim && s_localPlayerAgent.Inventory.WieldedItem.AimButtonHeld && s_localPlayerAgent.Inventory.WieldedSlot >= InventorySlot.GearStandard && s_localPlayerAgent.Inventory.WieldedSlot <= InventorySlot.GearClass)
+
+                if (Settings.TransparentWhenAim && s_localPlayerAgent.Inventory.WieldedItem != null && s_localPlayerAgent.Inventory.WieldedItem.AimButtonHeld && s_localPlayerAgent.Inventory.WieldedSlot >= InventorySlot.GearStandard && s_localPlayerAgent.Inventory.WieldedSlot <= InventorySlot.GearClass)
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
