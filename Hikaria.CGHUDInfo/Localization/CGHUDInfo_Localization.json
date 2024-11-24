@@ -76,6 +76,34 @@
           "Korean": null
         }
       },
+      "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.AutoFontSizeUp": {
+        "FSDisplayName": {
+          "English": "Auto Font Size Up",
+          "Chinese": "自动文本大小",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        },
+        "FSDescription": {
+          "English": "Automatically resize the corresponding text according to the wielding item",
+          "Chinese": "跟据手持物品自动调整对应文本大小",
+          "French": null,
+          "Italian": null,
+          "German": null,
+          "Spanish": null,
+          "Russian": null,
+          "Portuguese_Brazil": null,
+          "Polish": null,
+          "Japanese": null,
+          "Korean": null
+        }
+      },
       "Hikaria.CGHUDInfo.Features.CGHUDInfo+CGHUDInfoSettings.DynamicTrasparency": {
         "FSDisplayName": {
           "English": "Dynamic Trasparency",

@@ -39,6 +39,14 @@ namespace Hikaria.CGHUDInfo.Features
             [FSDisplayName("瞄准时透明")]
             public bool TransparentWhenAim { get; set; } = true;
 
+            [FSDisplayName("自动文本大小")]
+            [FSDescription("跟据手持物品自动调整对应文本大小")]
+            public bool AutoFontSizeUp { get; set; } = true;
+
+            [FSDisplayName("自动隐藏文本")]
+            [FSDescription("跟据手持物品自动隐藏无关内容")]
+            public bool AutoHideText { get; set; } = true;
+
             [FSDisplayName("动态透明度")]
             public bool DynamicTrasparency { get; set; } = true;
 
@@ -156,6 +164,7 @@ namespace Hikaria.CGHUDInfo.Features
                 {
                     __instance.m_marker.m_playerName.alignment = TMPro.TextAlignmentOptions.Bottom;
                     __instance.m_marker.m_playerName.fontSizeMax = 30f;
+                    __instance.m_marker.m_playerName.fontSizeMin = 25f;
                 }
             }
         }
@@ -202,9 +211,106 @@ namespace Hikaria.CGHUDInfo.Features
             }
         }
 
+        [ArchivePatch(typeof(PlayerInventoryLocal), nameof(PlayerInventoryLocal.DoWieldItem))]
+        private class PlayerInventoryLocal__DoWieldItem__Patch
+        {
+            private static void Postfix(PlayerInventoryLocal __instance)
+            {
+                PlaceNavMarkerOnGO__UpdateExtraInfo__Patch.UpdateSizeUp(__instance.Owner);
+            }
+        }
+
         [ArchivePatch(typeof(PlaceNavMarkerOnGO), nameof(PlaceNavMarkerOnGO.UpdateExtraInfo))]
         private class PlaceNavMarkerOnGO__UpdateExtraInfo__Patch
         {
+            static bool healthSizeUp = false;
+            static bool weaponSizeUp = false;
+            static bool toolSizeUp = false;
+            static bool infectionSizeUp = false;
+
+            static bool hideHealth = false;
+            static bool hideWeaponAmmo = false;
+            static bool hideInfection = false;
+            static bool hideToolAmmo = false;
+            static bool hideOthers = false;
+
+            enum eResourcePackType : byte
+            {
+                None,
+                Health,
+                AmmoWeapon,
+                AmmoTool,
+                Disinfection
+            }
+
+            static eResourcePackType currentResourcePack = eResourcePackType.None;
+
+            static eResourcePackType GetPackType(eResourceContainerSpawnType spawnType)
+            {
+                return spawnType switch
+                {
+                    eResourceContainerSpawnType.Disinfection => eResourcePackType.Disinfection,
+                    eResourceContainerSpawnType.Health => eResourcePackType.Health,
+                    eResourceContainerSpawnType.AmmoTool => eResourcePackType.AmmoTool,
+                    eResourceContainerSpawnType.AmmoWeapon => eResourcePackType.AmmoWeapon,
+                    _ => eResourcePackType.None,
+                };
+            }
+
+            public static void UpdateSizeUp(PlayerAgent playerAgent)
+            {
+                if (playerAgent.NavMarker == null)
+                    return;
+
+                playerAgent.NavMarker.m_isInfoDirty = true;
+
+                healthSizeUp = false;
+                weaponSizeUp = false;
+                toolSizeUp = false;
+                infectionSizeUp = false;
+
+                hideHealth = false;
+                hideInfection = false;
+                hideWeaponAmmo = false;
+                hideToolAmmo = false;
+                hideOthers = false;
+
+                currentResourcePack = playerAgent.Inventory.WieldedSlot == InventorySlot.ResourcePack ? GetPackType(playerAgent.Inventory.WieldedItem.Cast<ResourcePackFirstPerson>().m_packType) : eResourcePackType.None;
+
+                if (currentResourcePack != eResourcePackType.None)
+                {
+                    if (Settings.AutoHideText)
+                    {
+                        hideHealth = currentResourcePack != eResourcePackType.Health;
+                        hideInfection = currentResourcePack != eResourcePackType.Disinfection;
+                        hideWeaponAmmo = currentResourcePack != eResourcePackType.AmmoWeapon;
+                        hideToolAmmo = currentResourcePack != eResourcePackType.AmmoTool;
+                        hideOthers = true;
+                    }
+
+                    if (Settings.AutoFontSizeUp)
+                    {
+                        switch (currentResourcePack)
+                        {
+                            case eResourcePackType.Health:
+                                healthSizeUp = true;
+                                break;
+                            case eResourcePackType.AmmoWeapon:
+                                weaponSizeUp = true;
+                                break;
+                            case eResourcePackType.AmmoTool:
+                                toolSizeUp = true;
+                                break;
+                            case eResourcePackType.Disinfection:
+                                infectionSizeUp = true;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            static StringBuilder sb = new(300);
+
             private static bool Prefix(PlaceNavMarkerOnGO __instance)
             {
                 if (!__instance.m_hasPlayer || __instance.type != PlaceNavMarkerOnGO.eMarkerType.Player)
@@ -219,65 +325,62 @@ namespace Hikaria.CGHUDInfo.Features
                 if (damageable == null)
                     return ArchivePatch.RUN_OG;
 
-                StringBuilder sb = new(300);
-
-                if (Settings.ShowSlots.Contains(HUDInfos.Health))
+                if (!hideHealth && Settings.ShowSlots.Contains(HUDInfos.Health))
                 {
                     var health = damageable.GetHealthRel();
-                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size=75%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
+                    sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size={(healthSizeUp ? "100" : "75")}%><u>{Localization.Get(1)} {health * 100f:N0}%</u></size></color>");
                     if (Localization.CurrentLanguage != TheArchive.Core.Localization.Language.English)
                     {
                         // 添加空白行避免下划线与文本重叠问题
-                        sb.AppendLine($"<size=37.5%> </size>");
+                        sb.AppendLine($"<size={(healthSizeUp ? "50" : "37.5")}%> </size>");
                     }
                 }
 
-                if (Settings.ShowSlots.Contains(HUDInfos.Infection))
+                if (!hideInfection && Settings.ShowSlots.Contains(HUDInfos.Infection))
                 {
                     if (damageable.Infection > 0.1f)
-                        sb.AppendLine($"<color=#00FFA8><size=70%>{Localization.Get(2)} {damageable.Infection * 100f:N0}%</size></color>");
+                        sb.AppendLine($"<color=#00FFA8><size={(infectionSizeUp ? "100" : "70")}%>{Localization.Get(2)} {damageable.Infection * 100f:N0}%</size></color>");
                 }
 
                 var backpack = __instance.m_playerBackpack;
                 if (backpack != null)
                 {
                     var ammoStorage = backpack.AmmoStorage;
-
-                    if (Settings.ShowSlots.Contains(HUDInfos.GearStandard) && backpack.TryGetBackpackItem(InventorySlot.GearStandard, out var backpackItem))
+                    if (!hideWeaponAmmo && Settings.ShowSlots.Contains(HUDInfos.GearStandard) && backpack.TryGetBackpackItem(InventorySlot.GearStandard, out var backpackItem))
                     {
                         ItemEquippable itemEquippable = backpackItem.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable != null)
                         {
                             if (itemEquippable.ItemDataBlock != null && itemEquippable.ItemDataBlock.GUIShowAmmoInfinite)
                             {
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable.ArchetypeName}</color>");
+                                sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable.ArchetypeName}</color></size>");
                             }
                             else
                             {
                                 var standardAmmoRelInPack = ammoStorage.StandardAmmo.RelInPack;
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>{(backpackItem.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(standardAmmoRelInPack))}>{itemEquippable.ArchetypeName} {standardAmmoRelInPack * 100f:N0}%</color>{(backpackItem.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}</size>");
                             }
                         }
                     }
 
-                    if (Settings.ShowSlots.Contains(HUDInfos.GearSpecial) && backpack.TryGetBackpackItem(InventorySlot.GearSpecial, out var backpackItem2))
+                    if (!hideWeaponAmmo && Settings.ShowSlots.Contains(HUDInfos.GearSpecial) && backpack.TryGetBackpackItem(InventorySlot.GearSpecial, out var backpackItem2))
                     {
                         ItemEquippable itemEquippable2 = backpackItem2.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable2 != null)
                         {
                             if (itemEquippable2.ItemDataBlock != null && itemEquippable2.ItemDataBlock.GUIShowAmmoInfinite)
                             {
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable2.ArchetypeName}</color>");
+                                sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable2.ArchetypeName}</color></size>");
                             }
                             else
                             {
                                 var specialAmmoRelInPack = ammoStorage.SpecialAmmo.RelInPack;
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>{(backpackItem2.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(specialAmmoRelInPack))}>{itemEquippable2.ArchetypeName} {specialAmmoRelInPack * 100f:N0}%</color>{(backpackItem2.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}</size>");
                             }
                         }
                     }
 
-                    if (Settings.ShowSlots.Contains(HUDInfos.GearClass) && backpack.TryGetBackpackItem(InventorySlot.GearClass, out var backpackItem3) && backpackItem3 != null && backpackItem3.Instance != null)
+                    if (!hideToolAmmo && Settings.ShowSlots.Contains(HUDInfos.GearClass) && backpack.TryGetBackpackItem(InventorySlot.GearClass, out var backpackItem3) && backpackItem3 != null && backpackItem3.Instance != null)
                     {
                         ItemEquippable itemEquippable3 = backpackItem3.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable3 != null)
@@ -294,7 +397,7 @@ namespace Hikaria.CGHUDInfo.Features
                             }
                             if (itemEquippable3.ItemDataBlock != null && itemEquippable3.ItemDataBlock.GUIShowAmmoInfinite)
                             {
-                                sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{archetypeName}</color>");
+                                sb.AppendLine($"<size={(toolSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{archetypeName}</color></size>");
                             }
                             else
                             {
@@ -303,11 +406,11 @@ namespace Hikaria.CGHUDInfo.Features
                                 {
                                     classAmmoRelInPack = sentryGunInstance.Ammo / sentryGunInstance.AmmoMaxCap;
                                 }
-                                sb.AppendLine($"<color=#{_determineAmmoWeaponRelInPack.GetDeterminedColorHTML(classAmmoRelInPack)}>{archetypeName} {classAmmoRelInPack * 100f:N0}%</color>{(backpackItem3.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}");
+                                sb.AppendLine($"<size={(toolSizeUp ? "100" : "70")}%><color=#{_determineAmmoWeaponRelInPack.GetDeterminedColorHTML(classAmmoRelInPack)}>{archetypeName} {classAmmoRelInPack * 100f:N0}%</color>{(backpackItem3.Status == eInventoryItemStatus.Deployed ? $" <color=red>[{Text.Get(2505980868U)}]</color>" : string.Empty)}</size>");
                             }
                         }
                     }
-                    if (Settings.ShowSlots.Contains(HUDInfos.ResourcePack))
+                    if (!hideOthers && Settings.ShowSlots.Contains(HUDInfos.ResourcePack))
                     {
                         bool flag = false;
                         if (backpack.TryGetBackpackItem(InventorySlot.ResourcePack, out var backpackItem4) && backpackItem4 != null && backpackItem4.Instance != null)
@@ -335,7 +438,7 @@ namespace Hikaria.CGHUDInfo.Features
                             sb.AppendLine($"<color=#B3B3B3>{Localization.Get(3)}</color>");
                     }
 
-                    if (Settings.ShowSlots.Contains(HUDInfos.Consumable))
+                    if (!hideOthers && Settings.ShowSlots.Contains(HUDInfos.Consumable))
                     {
                         bool flag = false;
                         if (backpack.TryGetBackpackItem(InventorySlot.Consumable, out var backpackItem5) && backpackItem5 != null && backpackItem5.Instance != null)
@@ -364,7 +467,7 @@ namespace Hikaria.CGHUDInfo.Features
                     }
                 }
 
-                if (Settings.ShowSlots.Contains(HUDInfos.BotLeader) && owner.IsBot)
+                if (!hideOthers && Settings.ShowSlots.Contains(HUDInfos.BotLeader) && owner.IsBot)
                 {
                     PlayerAIBot component = playerAgent.GetComponent<PlayerAIBot>();
                     if (component != null)
@@ -376,6 +479,7 @@ namespace Hikaria.CGHUDInfo.Features
                 }
 
                 __instance.m_extraInfo = $"<color=#CCCCCC66><size=70%>{sb}</size></color>";
+                sb.Clear();
 
                 return ArchivePatch.SKIP_OG;
             }
@@ -422,9 +526,9 @@ namespace Hikaria.CGHUDInfo.Features
                 navMarker.transform.localScale = Vector3.one * scale;
 
                 var wieldItem = s_localPlayerAgent.Inventory.WieldedItem;
-                bool isBulletWeapon = wieldItem?.TryCast<BulletWeapon>() != null;
+                var wieldSlot = s_localPlayerAgent.Inventory.WieldedSlot;
 
-                if (Settings.TransparentWhenAim && isBulletWeapon && wieldItem.AimButtonHeld)
+                if (Settings.TransparentWhenAim && wieldItem.AimButtonHeld && wieldSlot >= InventorySlot.GearStandard && wieldSlot <= InventorySlot.GearClass)
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
