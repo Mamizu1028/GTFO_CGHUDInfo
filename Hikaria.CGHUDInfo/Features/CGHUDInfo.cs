@@ -115,7 +115,7 @@ namespace Hikaria.CGHUDInfo.Features
         {
             foreach (var modifier in UnityEngine.Object.FindObjectsOfType<PlayerHudDistanceModifier>())
             {
-                modifier.UpdateNavMarkerOnPlayer();
+                modifier.UpdateNavMarkerOnPlayer(true);
             }
         }
 
@@ -259,11 +259,6 @@ namespace Hikaria.CGHUDInfo.Features
 
             public static void UpdateSizeUp(PlayerAgent playerAgent)
             {
-                if (playerAgent.NavMarker == null)
-                    return;
-
-                playerAgent.NavMarker.m_isInfoDirty = true;
-
                 healthSizeUp = false;
                 weaponSizeUp = false;
                 toolSizeUp = false;
@@ -509,12 +504,16 @@ namespace Hikaria.CGHUDInfo.Features
                 placeNavMarkerOnGO.m_isInfoDirty = true;
             }
 
-            public void UpdateNavMarkerOnPlayer()
+            public void UpdateNavMarkerOnPlayer(bool manualUpdate = false)
             {
                 var placeNavMarkerOnGO = m_owner.NavMarker;
                 var navMarker = placeNavMarkerOnGO?.m_marker;
                 if (navMarker == null)
                     return;
+
+                if (manualUpdate)
+                    placeNavMarkerOnGO.m_isInfoDirty = true;
+
                 if (s_localPlayerAgent == null)
                 {
                     s_localPlayerAgent = PlayerManager.GetLocalPlayerAgent();
@@ -525,10 +524,7 @@ namespace Hikaria.CGHUDInfo.Features
                 float scale = Mathf.Clamp(Mathf.Clamp(Vector3.Distance(m_owner.Position, s_localPlayerAgent.Position), MIN_DISTANCE, MAX_DISTANCE) / MAX_DISTANCE, MIN_SIZE, MAX_SIZE);
                 navMarker.transform.localScale = Vector3.one * scale;
 
-                var wieldItem = s_localPlayerAgent.Inventory.WieldedItem;
-                var wieldSlot = s_localPlayerAgent.Inventory.WieldedSlot;
-
-                if (Settings.TransparentWhenAim && wieldItem.AimButtonHeld && wieldSlot >= InventorySlot.GearStandard && wieldSlot <= InventorySlot.GearClass)
+                if (Settings.TransparentWhenAim && s_localPlayerAgent.Inventory.WieldedItem.AimButtonHeld && s_localPlayerAgent.Inventory.WieldedSlot >= InventorySlot.GearStandard && s_localPlayerAgent.Inventory.WieldedSlot <= InventorySlot.GearClass)
                 {
                     navMarker.SetAlpha(MIN_ANGLE_ALPHA_VALUE);
                 }
