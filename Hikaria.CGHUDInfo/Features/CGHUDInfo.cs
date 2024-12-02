@@ -2,6 +2,7 @@
 using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TheArchive.Core.Attributes;
 using TheArchive.Core.Attributes.Feature.Settings;
@@ -14,7 +15,6 @@ using UnityEngine;
 
 namespace Hikaria.CGHUDInfo.Features
 {
-    [EnableFeatureByDefault]
     public class CGHUDInfo : Feature
     {
         public override string Name => "HUD信息增强";
@@ -34,7 +34,7 @@ namespace Hikaria.CGHUDInfo.Features
             public List<HUDInfos> ShowSlots { get; set; } = new();
 
             [FSDisplayName("隐藏空栏位")]
-            public bool HideEmptySlots { get; set; } = true;
+            public bool HideEmptySlots { get; set; } = false;
 
             [FSDisplayName("瞄准时透明")]
             public bool TransparentWhenAim { get; set; } = true;
@@ -220,6 +220,16 @@ namespace Hikaria.CGHUDInfo.Features
             }
         }
 
+        [ArchivePatch(typeof(PlayerAgent), nameof(PlayerAgent.Alive), null, ArchivePatch.PatchMethodType.Setter)]
+        private class PlayerAgent__set_Alive__Patch
+        {
+            private static void Postfix(PlayerAgent __instance)
+            {
+                if (__instance.IsLocallyOwned)
+                    PlaceNavMarkerOnGO__UpdateExtraInfo__Patch.UpdateSizeUp(__instance);
+            }
+        }
+
         [ArchivePatch(typeof(PlaceNavMarkerOnGO), nameof(PlaceNavMarkerOnGO.UpdateExtraInfo))]
         private class PlaceNavMarkerOnGO__UpdateExtraInfo__Patch
         {
@@ -243,7 +253,7 @@ namespace Hikaria.CGHUDInfo.Features
                 Disinfection
             }
 
-            static eResourcePackType currentResourcePack = eResourcePackType.None;
+            static eResourcePackType currentResourcePackType = eResourcePackType.None;
 
             static eResourcePackType GetPackType(eResourceContainerSpawnType spawnType)
             {
@@ -257,7 +267,7 @@ namespace Hikaria.CGHUDInfo.Features
                 };
             }
 
-            public static void UpdateSizeUp(PlayerAgent playerAgent)
+            public static void UpdateSizeUp(PlayerAgent localPlayer)
             {
                 healthSizeUp = false;
                 weaponSizeUp = false;
@@ -270,22 +280,22 @@ namespace Hikaria.CGHUDInfo.Features
                 hideToolAmmo = false;
                 hideOthers = false;
 
-                currentResourcePack = playerAgent.Inventory.WieldedSlot == InventorySlot.ResourcePack ? GetPackType(playerAgent.Inventory.WieldedItem.Cast<ResourcePackFirstPerson>().m_packType) : eResourcePackType.None;
+                currentResourcePackType = localPlayer.Inventory.WieldedSlot == InventorySlot.ResourcePack ? GetPackType(localPlayer.Inventory.WieldedItem.Cast<ResourcePackFirstPerson>().m_packType) : eResourcePackType.None;
 
-                if (currentResourcePack != eResourcePackType.None)
+                if (localPlayer.Alive && currentResourcePackType != eResourcePackType.None)
                 {
                     if (Settings.AutoHideText)
                     {
-                        hideHealth = currentResourcePack != eResourcePackType.Health;
-                        hideInfection = currentResourcePack != eResourcePackType.Disinfection;
-                        hideWeaponAmmo = currentResourcePack != eResourcePackType.AmmoWeapon;
-                        hideToolAmmo = currentResourcePack != eResourcePackType.AmmoTool;
+                        hideHealth = currentResourcePackType != eResourcePackType.Health;
+                        hideInfection = currentResourcePackType != eResourcePackType.Disinfection;
+                        hideWeaponAmmo = currentResourcePackType != eResourcePackType.AmmoWeapon;
+                        hideToolAmmo = currentResourcePackType != eResourcePackType.AmmoTool;
                         hideOthers = true;
                     }
 
                     if (Settings.AutoFontSizeUp)
                     {
-                        switch (currentResourcePack)
+                        switch (currentResourcePackType)
                         {
                             case eResourcePackType.Health:
                                 healthSizeUp = true;
