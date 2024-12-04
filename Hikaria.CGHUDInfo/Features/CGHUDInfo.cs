@@ -2,7 +2,6 @@
 using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
-using System.Runtime.CompilerServices;
 using System.Text;
 using TheArchive.Core.Attributes;
 using TheArchive.Core.Attributes.Feature.Settings;
@@ -356,7 +355,7 @@ namespace Hikaria.CGHUDInfo.Features
                         ItemEquippable itemEquippable = backpackItem.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable != null)
                         {
-                            if (itemEquippable.ItemDataBlock != null && itemEquippable.ItemDataBlock.GUIShowAmmoInfinite)
+                            if (itemEquippable.ItemDataBlock != null && itemEquippable.ItemDataBlock.GUIShowAmmoInfinite || !itemEquippable.ItemDataBlock.GUIShowAmmoTotalRel)
                             {
                                 sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable.ArchetypeName}</color></size>");
                             }
@@ -373,7 +372,7 @@ namespace Hikaria.CGHUDInfo.Features
                         ItemEquippable itemEquippable2 = backpackItem2.Instance.TryCast<ItemEquippable>();
                         if (itemEquippable2 != null)
                         {
-                            if (itemEquippable2.ItemDataBlock != null && itemEquippable2.ItemDataBlock.GUIShowAmmoInfinite)
+                            if (itemEquippable2.ItemDataBlock != null && itemEquippable2.ItemDataBlock.GUIShowAmmoInfinite || !itemEquippable2.ItemDataBlock.GUIShowAmmoTotalRel)
                             {
                                 sb.AppendLine($"<size={(weaponSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(_determineAmmoWeaponRelInPack.GetDeterminedColor(100))}>{itemEquippable2.ArchetypeName}</color></size>");
                             }
@@ -400,7 +399,7 @@ namespace Hikaria.CGHUDInfo.Features
                                 if (block != null)
                                     archetypeName = block.PublicName;
                             }
-                            if (itemEquippable3.ItemDataBlock != null && itemEquippable3.ItemDataBlock.GUIShowAmmoInfinite)
+                            if (itemEquippable3.ItemDataBlock != null && itemEquippable3.ItemDataBlock.GUIShowAmmoInfinite || !itemEquippable3.ItemDataBlock.GUIShowAmmoTotalRel)
                             {
                                 sb.AppendLine($"<size={(toolSizeUp ? "100" : "70")}%><color=#{ColorUtility.ToHtmlStringRGBA(ColorExt.Hex("FDA1FF"))}>{archetypeName}</color></size>");
                             }
@@ -423,7 +422,7 @@ namespace Hikaria.CGHUDInfo.Features
                             ItemEquippable itemEquippable4 = backpackItem4.Instance.TryCast<ItemEquippable>();
                             if (itemEquippable4 != null)
                             {
-                                if (itemEquippable4.ItemDataBlock != null && itemEquippable4.ItemDataBlock.GUIShowAmmoInfinite)
+                                if (itemEquippable4.ItemDataBlock != null && itemEquippable4.ItemDataBlock.GUIShowAmmoInfinite || !itemEquippable4.ItemDataBlock.GUIShowAmmoTotalRel)
                                 {
                                     sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_detemineAmmoResourceRelInPack.GetDeterminedColor(100))}>{itemEquippable4.ArchetypeName}</color>");
                                     flag = true;
@@ -451,7 +450,7 @@ namespace Hikaria.CGHUDInfo.Features
                             ItemEquippable itemEquippable5 = backpackItem5.Instance.TryCast<ItemEquippable>();
                             if (itemEquippable5 != null)
                             {
-                                if (itemEquippable5.ItemDataBlock != null && itemEquippable5.ItemDataBlock.GUIShowAmmoInfinite)
+                                if (itemEquippable5.ItemDataBlock != null && (itemEquippable5.ItemDataBlock.GUIShowAmmoInfinite || !itemEquippable5.ItemDataBlock.GUIShowAmmoTotalRel))
                                 {
                                     sb.AppendLine($"<color=#{ColorUtility.ToHtmlStringRGBA(_detemineAmmoResourceRelInPack.GetDeterminedColor(100))}>{itemEquippable5.ArchetypeName}</color>");
                                     flag = true;
