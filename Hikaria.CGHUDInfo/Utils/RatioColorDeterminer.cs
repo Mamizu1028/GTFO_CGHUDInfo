@@ -6,7 +6,8 @@ namespace Hikaria.CGHUDInfo.Utils
 	{
 		public Color GetDeterminedColor(float ratio, float ratioScale = 1f)
 		{
-			Color color = Color.white;
+            ratioScale = Mathf.Clamp(ratioScale, 0.001f, 1f);
+            Color color = Color.white;
 			float num = 0f;
 			Color color2 = Color.black;
 			for (int i = 0; i < _colorGrades.Count; i++)
