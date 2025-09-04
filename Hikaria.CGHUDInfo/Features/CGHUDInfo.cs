@@ -3,7 +3,8 @@ using Hikaria.CGHUDInfo.Utils;
 using Localization;
 using Player;
 using System.Text;
-using TheArchive.Core.Attributes;
+using TheArchive.Core.Attributes.Feature.Members;
+using TheArchive.Core.Attributes.Feature.Patches;
 using TheArchive.Core.Attributes.Feature.Settings;
 using TheArchive.Core.FeaturesAPI;
 using TheArchive.Core.FeaturesAPI.Settings;
@@ -19,8 +20,6 @@ namespace Hikaria.CGHUDInfo.Features
         public override string Name => "HUD信息增强";
 
         public override string Description => "使HUD信息更清晰易读";
-
-        public override FeatureGroup Group => FeatureGroups.Accessibility;
 
         public static new ILocalizationService Localization { get; set; }
 
