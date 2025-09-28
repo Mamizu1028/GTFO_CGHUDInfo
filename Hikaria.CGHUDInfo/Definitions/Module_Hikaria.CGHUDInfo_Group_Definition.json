@@ -1,30 +1,32 @@
 ﻿{
   "ModuleGroup": {
-    "DisplayName": {
-      "English": "Color Grading HUD Info",
-      "Chinese": "HUD 信息增强",
-      "French": null,
-      "Italian": null,
-      "German": null,
-      "Spanish": null,
-      "Russian": null,
-      "Portuguese_Brazil": null,
-      "Polish": null,
-      "Japanese": null,
-      "Korean": null
-    },
-    "Description": {
-      "English": null,
-      "Chinese": null,
-      "French": null,
-      "Italian": null,
-      "German": null,
-      "Spanish": null,
-      "Russian": null,
-      "Portuguese_Brazil": null,
-      "Polish": null,
-      "Japanese": null,
-      "Korean": null
+    "LocalizationData": {
+      "DisplayName": {
+        "English": "Booster Tweaker",
+        "Chinese": "强化剂调节器",
+        "French": null,
+        "Italian": null,
+        "German": null,
+        "Spanish": null,
+        "Russian": null,
+        "Portuguese_Brazil": null,
+        "Polish": null,
+        "Japanese": null,
+        "Korean": null
+      },
+      "Description": {
+        "English": null,
+        "Chinese": null,
+        "French": null,
+        "Italian": null,
+        "German": null,
+        "Spanish": null,
+        "Russian": null,
+        "Portuguese_Brazil": null,
+        "Polish": null,
+        "Japanese": null,
+        "Korean": null
+      }
     },
     "SubGroups": []
   },
