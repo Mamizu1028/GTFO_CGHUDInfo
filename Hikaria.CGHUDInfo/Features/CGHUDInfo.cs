@@ -211,8 +211,8 @@ public class CGHUDInfo : Feature
         }
     }
 
-    [ArchivePatch(typeof(SentryGunInstance), nameof(SentryGunInstance.OnDestroy))]
-    private class SentryGunInstance__OnDestroy__Patch
+    [ArchivePatch(typeof(SentryGunInstance), nameof(SentryGunInstance.OnDespawn))]
+    private class SentryGunInstance__OnDespawn__Patch
     {
         private static void Prefix(SentryGunInstance __instance)
         {
@@ -235,7 +235,7 @@ public class CGHUDInfo : Feature
         }
     }
 
-    [ArchivePatch(typeof(PlayerAgent), nameof(PlayerAgent.Alive), null, ArchivePatch.PatchMethodType.Setter)]
+    [ArchivePatch(typeof(PlayerAgent), nameof(PlayerAgent.Alive), patchMethodType: ArchivePatch.PatchMethodType.Setter)]
     private class PlayerAgent__set_Alive__Patch
     {
         private static void Postfix(PlayerAgent __instance)
