@@ -12,7 +12,6 @@ using TheArchive.Core.Localization;
 using TheArchive.Loader;
 using TheArchive.Utilities;
 using UnityEngine;
-using static Player.RootPlayerBotAction.GearAvailability;
 
 namespace Hikaria.CGHUDInfo.Features;
 
@@ -347,7 +346,7 @@ public class CGHUDInfo : Feature
 
             if (!hideHealth && Settings.ShowSlots.Contains(HUDInfos.Health))
             {
-                var health = damageable.GetHealthRel();
+                var health = Mathf.Clamp01(damageable.GetHealthRel());
                 sb.AppendLine($"<color=#{_determinerHealth.GetDeterminedColorHTML(health, 1f - damageable.Infection)}><size={(healthSizeUp ? "100" : "75")}%><u>{Localization.GetById(1)} {health * 100f:N0}%</u></size></color>");
                 if (Localization.CurrentLanguage == TheArchive.Core.Localization.Language.Chinese)
                 {
@@ -408,10 +407,10 @@ public class CGHUDInfo : Feature
                         string archetypeName = itemEquippable3.ArchetypeName;
                         var idRange = itemEquippable3.GearIDRange;
                         uint compID = idRange.GetCompID(eGearComponent.Category);
-                        eWeaponFireMode compID2 = (eWeaponFireMode)idRange.GetCompID(eGearComponent.FireMode);
+                        eWeaponFireMode fireMode = (eWeaponFireMode)idRange.GetCompID(eGearComponent.FireMode);
                         if (compID == 12U)
                         {
-                            var block = SentryGunInstance_Firing_Bullets.GetArchetypeDataForFireMode(compID2);
+                            var block = SentryGunInstance_Firing_Bullets.GetArchetypeDataForFireMode(fireMode);
                             if (block != null)
                                 archetypeName = block.PublicName;
                         }
@@ -422,7 +421,7 @@ public class CGHUDInfo : Feature
                         else
                         {
                             float classAmmoRelInPack = ammoStorage.ClassAmmo.RelInPack;
-                            if (_sentryGunInstances.TryGetValue(owner.Lookup, out var sentryGunInstance))
+                            if (compID == 12U && _sentryGunInstances.TryGetValue(owner.Lookup, out var sentryGunInstance))
                             {
                                 classAmmoRelInPack = sentryGunInstance.Ammo / sentryGunInstance.AmmoMaxCap;
                             }
